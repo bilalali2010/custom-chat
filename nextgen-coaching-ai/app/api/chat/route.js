@@ -31,7 +31,7 @@ export async function POST(req) {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: "liquid/lfm-2.5-2.6b:free",
+          model: "poolside/laguna-s-2.1:free",
           messages: [
             { role: "system", content: systemPrompt },
             { role: "user", content: message }
