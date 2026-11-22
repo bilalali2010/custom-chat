@@ -79,7 +79,7 @@ export async function POST(req) {
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            model: "nvidia/nemotron-3-super-120b-a12b:free",
+            model: "baseten/groundhog-1",
             messages: [
               { role: "system", content: systemPrompt },
               { role: "user", content: message }
