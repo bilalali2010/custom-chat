@@ -79,7 +79,7 @@ export async function POST(req) {
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            model: "baseten/groundhog-1",
+            model: "recraft/recraft-v4.1-flash-v2:free",
             messages: [
               { role: "system", content: systemPrompt },
               { role: "user", content: message }
