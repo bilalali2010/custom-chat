@@ -3,6 +3,8 @@ import path from "path";
 import { matchFaq } from "@/lib/faqMatcher";
 
 const AI_TIMEOUT_MS = 15000;
+// Must be a CHAT model (not an embedding model). Override in .env.local with OPENROUTER_MODEL.
+const AI_MODEL = process.env.OPENROUTER_MODEL || "openrouter/free";
 
 function loadJson(fileName) {
   const filePath = path.join(process.cwd(), "data", fileName);
@@ -67,6 +69,9 @@ export async function POST(req) {
     const systemPrompt = buildSystemPrompt(coachingDataRaw);
 
     try {
+      if (!process.env.OPENROUTER_API_KEY) {
+        throw new Error("OPENROUTER_API_KEY is not set (create .env.local or add it in your host's env vars)");
+      }
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
 
@@ -79,7 +84,7 @@ export async function POST(req) {
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            model: "nvidia/nemotron-3.5-embed-1b:free",
+            model: AI_MODEL,
             messages: [
               { role: "system", content: systemPrompt },
               { role: "user", content: message }
@@ -96,8 +101,11 @@ export async function POST(req) {
       if (response.ok && aiReply) {
         return Response.json({ reply: aiReply, source: "ai" });
       }
-      throw new Error("AI response missing or request failed");
+      throw new Error(
+        "OpenRouter " + response.status + ": " + JSON.stringify(data?.error || data).slice(0, 500)
+      );
     } catch (aiError) {
+      console.error("[chat] AI call failed:", aiError?.message || aiError);
       // --- Tier 3: AI unreachable / errored / timed out ---------------
       // Fall back to the closest FAQ match at a lower confidence bar
       // before giving up and pointing the user to a human.
